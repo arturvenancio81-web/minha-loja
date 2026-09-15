@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Farmácia - Tudo o que você precisa</title>
+  <title>FARMÁCIA STORE - Tudo o que você precisa</title>
   <style>
     * {
       box-sizing: border-box;
@@ -199,6 +199,13 @@
     .btn-buy:hover {
       background-color: #0b5ed7;
     }
+
+    .no-products {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #666;
+      padding: 40px;
+    }
   </style>
 </head>
 <body>
@@ -207,8 +214,8 @@
   <header>
     <div class="logo">FARMÁCIA <span>STORE</span></div>
     <div class="search-box">
-      <input type="text" placeholder="O que você está procurando hoje?">
-      <button>Buscar</button>
+      <input type="text" id="searchInput" placeholder="O que você está procurando hoje?" onkeyup="buscarProduto()">
+      <button onclick="buscarProduto()">Buscar</button>
     </div>
   </header>
 
@@ -220,60 +227,98 @@
 
   <!-- Categorias -->
   <div class="categories">
-    <button class="btn-category active">Todos os Produtos</button>
-    <button class="btn-category">Eletrônicos</button>
-    <button class="btn-category">Casa & Cozinha</button>
-    <button class="btn-category">Moda & Acessórios</button>
-    <button class="btn-category">Ofertas do Dia</button>
+    <button class="btn-category active" onclick="filtrarCategoria('todos', this)">Todos os Produtos</button>
+    <button class="btn-category" onclick="filtrarCategoria('eletronicos', this)">Eletrônicos</button>
+    <button class="btn-category" onclick="filtrarCategoria('casa', this)">Casa & Cozinha</button>
+    <button class="btn-category" onclick="filtrarCategoria('moda', this)">Moda & Acessórios</button>
+    <button class="btn-category" onclick="filtrarCategoria('ofertas', this)">Ofertas do Dia</button>
   </div>
 
   <!-- Lista de Produtos -->
   <div class="container">
     <h3 class="section-title">Oportunidades em Destaque</h3>
     
-    <div class="products-grid">
-      
-      <!-- Produto 1 -->
-      <div class="product-card">
-        <span class="discount-badge">OFERTA</span>
-        <div class="img-container">
-          <img src="rapaz.jpg" alt="Rapaz bonito e fiel solteiro" class="product-img">
-        </div>
-        <h3 class="product-title">Rapaz bonito e fiel solteiro</h3>
-        <div class="price">R$ 0,00</div>
-        <div class="installments">em até 3x de R$ 0,00 sem juros</div>
-        <div class="shipping">⚡ Frete Grátis</div>
-        <button class="btn-buy">Comprar agora</button>
-      </div>
-
-      <!-- Produto 2 -->
-      <div class="product-card">
-        <span class="discount-badge">OFERTA</span>
-        <div class="img-container">
-          <img src="camisa.jpg" alt="camisa original" class="product-img">
-        </div>
-        <h3 class="product-title">camisa original</h3>
-        <div class="price">R$ 40,00</div>
-        <div class="installments">em até 3x de R$ 13,33 sem juros</div>
-        <div class="shipping">⚡ Frete Grátis</div>
-        <button class="btn-buy">Comprar agora</button>
-      </div>
-
-      <!-- Produto 3 -->
-      <div class="product-card">
-        <span class="discount-badge">OFERTA</span>
-        <div class="img-container">
-          <img src="lamborghini.jpg" alt="Lamborghini" class="product-img">
-        </div>
-        <h3 class="product-title">Lamborghini</h3>
-        <div class="price">R$ 25,50</div>
-        <div class="installments">em até 3x de R$ 8,50 sem juros</div>
-        <div class="shipping">⚡ Frete Grátis</div>
-        <button class="btn-buy">Comprar agora</button>
-      </div>
-
+    <div class="products-grid" id="productsGrid">
+      <!-- Produtos renderizados aqui -->
     </div>
   </div>
 
+  <script>
+    // Lista fixa de produtos
+    const produtos = [
+      {
+        id: 1,
+        nome: "Rapaz bonito e fiel solteiro",
+        preco: "0,00",
+        parcelas: "em até 3x de R$ 0,00 sem juros",
+        imagem: "rapaz.jpg",
+        categoria: "moda"
+      },
+      {
+        id: 2,
+        nome: "camisa original",
+        preco: "40,00",
+        parcelas: "em até 3x de R$ 13,33 sem juros",
+        imagem: "camisa.jpg",
+        categoria: "moda"
+      },
+      {
+        id: 3,
+        nome: "Lamborghini",
+        preco: "25,50",
+        parcelas: "em até 3x de R$ 8,50 sem juros",
+        imagem: "lamborghini.jpg",
+        categoria: "ofertas"
+      }
+    ];
+
+    function renderizarProdutos(lista) {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+
+      if (lista.length === 0) {
+        grid.innerHTML = '<p class="no-products">Nenhum produto encontrado.</p>';
+        return;
+      }
+
+      lista.forEach(p => {
+        grid.innerHTML += `
+          <div class="product-card">
+            <span class="discount-badge">OFERTA</span>
+            <div class="img-container">
+              <img src="${p.imagem}" alt="${p.nome}" class="product-img" onerror="this.src='https://via.placeholder.com/150?text=Sem+Imagem'">
+            </div>
+            <h3 class="product-title">${p.nome}</h3>
+            <div class="price">R$ ${p.preco}</div>
+            <div class="installments">${p.parcelas}</div>
+            <div class="shipping">⚡ Frete Grátis</div>
+            <button class="btn-buy">Comprar agora</button>
+          </div>
+        `;
+      });
+    }
+
+    function buscarProduto() {
+      const termo = document.getElementById('searchInput').value.toLowerCase();
+      const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(termo));
+      renderizarProdutos(filtrados);
+    }
+
+    function filtrarCategoria(cat, btn) {
+      document.querySelectorAll('.btn-category').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (cat === 'todos') {
+        renderizarProdutos(produtos);
+      } else {
+        const filtrados = produtos.filter(p => p.categoria === cat);
+        renderizarProdutos(filtrados);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderizarProdutos(produtos);
+    });
+  </script>
 </body>
 </html>
